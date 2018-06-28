@@ -17,7 +17,7 @@ namespace Autofarmer {
 			// LayoutKind.Sequential to store the fields correctly ordered in memory
 			// Pack=1 if we need to read a byte at a time
 			[StructLayout(LayoutKind.Sequential, Pack = 1)]
-			public struct SYSTEM_HANDLE_INFORMATION { // Returned data from SystemHandleInformation
+			public struct SYSTEM_HANDLE_INFORMATION { // Returned data from SystemHandleInformation, a handle
 				public int ProcessID;
 				public byte ObjectTypeNumber;
 				public byte Flags; // 0x01 = PROTECT_FROM_CLOSE, 0x02 = INHERIT
@@ -61,32 +61,6 @@ namespace Autofarmer {
 		private static extern uint NtQuerySystemInformation(uint SystemInformationClass, IntPtr SystemInformation,
 			int SystemInformationLength, ref int nLength);
 
-		[DllImport("user32.dll")]
-		private static extern int SetWindowText(IntPtr hWnd, string text);
-
-		//[DllImport("user32.dll")]
-		//private static extern bool MoveWindow(IntPtr hWnd, int X, int Y, int nWidth, int nHeight, bool bRepaint);
-		//private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
-
-		private Process growtopia = new Process();
-		private List<Process> processes = new List<Process>(); // List of open Growtopia processes
-
-		private string _growtopiaPath = "";
-		private string GrowtopiaPath {
-			get {
-				return _growtopiaPath;
-			}
-			set {
-				if (File.Exists(value)) {
-					_growtopiaPath = value;
-					fileSelectDialog.InitialDirectory = _growtopiaPath;
-					fileNameDisplayer.Text = _growtopiaPath;
-				} else {
-					MessageBox.Show("Incorrect file specified", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-				}
-			}
-		}
-
 		[DllImport("kernel32.dll")]
 		// dwDesiredAccess sets the process access rights (docs.microsoft.com/en-us/windows/desktop/ProcThread/process-security-and-access-rights)
 		// if bInheritHandle is true, processes created by this process will inherit the handle (we don't need this, maybe just set it as a bool)
@@ -107,7 +81,7 @@ namespace Autofarmer {
 		// ObjectInformationClass is the type of information we want; ObjectBasicInformation/ObjectTypeInformation, undocumented ObjectNameInformation?
 		// ObjectInformation is the buffer where the data is returned to, ObjectInformationLength is the size of that buffer
 		// returnLength is a variable where NtQueryObject writes the size of the information returned to us
-		public static extern int NtQueryObject(IntPtr Handle, int ObjectInformationClass, IntPtr ObjectInformation, 
+		public static extern int NtQueryObject(IntPtr Handle, int ObjectInformationClass, IntPtr ObjectInformation,
 			int ObjectInformationLength, ref int returnLength);
 
 		[DllImport("kernel32.dll", SetLastError = true)] // Display errors
@@ -118,7 +92,35 @@ namespace Autofarmer {
 		private static extern bool DuplicateHandle(IntPtr hSourceProcessHandle, ushort hSourceHandle, IntPtr hTargetProcessHandle,
 			out IntPtr lpTargetHandle, uint dwDesiredAccess, [MarshalAs(UnmanagedType.Bool)] bool bInheritHandle, uint dwOptions);
 
-		private static string viewHandleName(WS.SYSTEM_HANDLE_INFORMATION shHandle, Process process) {
+		[DllImport("kernel32.dll")]
+		// Access rights, inheritance bool, ID of thread
+		static extern IntPtr OpenThread(int dwDesiredAccess, bool bInheritHandle, uint dwThreadId);
+		[DllImport("kernel32.dll")]
+		// Thread to suspend
+		static extern uint SuspendThread(IntPtr hThread);
+		[DllImport("kernel32.dll")]
+		// Thread to resume
+		static extern int ResumeThread(IntPtr hThread);
+
+		private List<Process> processes = new List<Process>(); // List of open Growtopia processes
+
+		private string _growtopiaPath = "";
+		private string GrowtopiaPath {
+			get {
+				return _growtopiaPath;
+			}
+			set {
+				if (File.Exists(value)) {
+					_growtopiaPath = value;
+					fileSelectDialog.InitialDirectory = _growtopiaPath;
+					fileNameDisplayer.Text = _growtopiaPath;
+				} else {
+					MessageBox.Show("Incorrect file specified", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				}
+			}
+		}
+
+		private static string ViewHandleName(WS.SYSTEM_HANDLE_INFORMATION shHandle, Process process) {
 			// handleInfoStruct is the struct that contains data about our handle
 			// targetProcess is the process where the handle resides
 			// DUP_HANDLE (0x40) might also work
@@ -171,16 +173,13 @@ namespace Autofarmer {
 			}
 
 			if (handlerName != IntPtr.Zero) {
-
 				byte[] baTemp2 = new byte[nameInfoLength];
 				try {
 					Marshal.Copy(handlerName, baTemp2, 0, nameInfoLength);
 					return Marshal.PtrToStringUni(Is64Bits() ? new IntPtr(handlerName.ToInt64()) : new IntPtr(handlerName.ToInt32()));
-				}
-				catch (AccessViolationException) {
+				} catch (AccessViolationException) {
 					return null;
-				}
-				finally {
+				} finally {
 					Marshal.FreeHGlobal(nameQueryData);
 					CloseHandle(targetHandle);
 				}
@@ -188,8 +187,8 @@ namespace Autofarmer {
 			return null;
 		}
 
-		// Closes a mutant handle in an external process that has a specific name
-		private void listProcessHandles(object sender, EventArgs e) {
+		// Closes all needed mutant handles in given process
+		private void CloseProcessHandles(Process growtopia) { // We need to remove handlers from the last process
 			Console.WriteLine("Starting handle magic...");
 			statusMessage.Text = "Querying system handle information...";
 			int nLength = 0;
@@ -201,7 +200,6 @@ namespace Autofarmer {
 						 // Assign result of NtQuerySystemInformation to this variable and check if the buffer size is correct
 						 // If it's incorrect, it returns STATUS_INFO_LENGTH_MISMATCH (0xc0000004)
 			while ((result = NtQuerySystemInformation(0x10, infoPointer, sysInfoLength, ref nLength)) == 0xc0000004) {
-				Console.WriteLine("Repeat and rinse?!?!");
 				sysInfoLength = nLength;
 				Marshal.FreeHGlobal(infoPointer);
 				infoPointer = Marshal.AllocHGlobal(nLength);
@@ -221,11 +219,11 @@ namespace Autofarmer {
 				handlePointer = new IntPtr(infoPointer.ToInt32() + 4); // Ignores 4 first bits instead of 8
 			}
 
-			statusMessage.Text = "Query received, searching the " + sysHandleCount + " results.";
+			statusMessage.Text = "Query received, processing the " + sysHandleCount + " results.";
 
 			WS.SYSTEM_HANDLE_INFORMATION handleInfoStruct; // The struct to hold info about a single handler
-			List<WS.SYSTEM_HANDLE_INFORMATION> handleStructsList = new List<WS.SYSTEM_HANDLE_INFORMATION>(); // List of handle structs
-			
+
+			List<WS.SYSTEM_HANDLE_INFORMATION> handles = new List<WS.SYSTEM_HANDLE_INFORMATION>();
             for (long i = 0; i < sysHandleCount; i++) { // Iterate over handle structs in the handle struct list
 				handleInfoStruct = new WS.SYSTEM_HANDLE_INFORMATION();
 				if (Is64Bits()) {
@@ -242,18 +240,65 @@ namespace Autofarmer {
 				}
 
 				// TODO: Get the handle path
-				string handleName = viewHandleName(handleInfoStruct, growtopia);
+				string handleName = ViewHandleName(handleInfoStruct, growtopia);
 				if (@"\Sessions\1\BaseNamedObjects\Growtopia" != handleName) {
 					continue; // This is not a handle we're looking for
 				}
-
+				handles.Add(handleInfoStruct);
 				Console.WriteLine("PID {0,7} Pointer {1,12} Type {2,4} Name {3}", handleInfoStruct.ProcessID.ToString(), 
 																				  handleInfoStruct.Object_Pointer.ToString(),
 																				  handleInfoStruct.ObjectTypeNumber.ToString(),
 																				  handleName);
 			}
+
+			Console.WriteLine("Closing mutexes?");
+			foreach (WS.SYSTEM_HANDLE_INFORMATION handle in handles) {
+				CloseMutex(handle);
+			}
+
 			statusMessage.Text = "Query finished, " + sysHandleCount + " results processed.";
 			Console.WriteLine("Handle closed.");
+		}
+
+		private void SuspendProcess(Process process) {
+			foreach (ProcessThread pT in process.Threads) {
+				// SUSPEND_RESUME = 0x0002
+				IntPtr pOpenThread = OpenThread(0x0002, false, (uint)pT.Id);
+
+				if (pOpenThread == IntPtr.Zero) {
+					continue;
+				}
+
+				SuspendThread(pOpenThread);
+				CloseHandle(pOpenThread);
+			}
+		}
+		private void ResumeProcess(Process process) {
+			foreach (ProcessThread pT in process.Threads) {
+				// SUSPEND_RESUME = 0x0002
+				IntPtr pOpenThread = OpenThread(0x0002, false, (uint)pT.Id);
+				
+				if (pOpenThread == IntPtr.Zero) {
+					continue;
+				}
+
+				var suspendCount = 0;
+				do {
+					suspendCount = ResumeThread(pOpenThread);
+				} while (suspendCount > 0);
+
+				CloseHandle(pOpenThread);
+			}
+		}
+
+		private void CloseMutex(WS.SYSTEM_HANDLE_INFORMATION handle) {
+			IntPtr targetHandle;
+			// DUPLICATE_CLOSE_SOURCE = 0x1
+			// GetCurrentProcess(), out targetHandle ======> Set target process to null for success
+			if (!DuplicateHandle(Process.GetProcessById(handle.ProcessID).Handle, handle.Handle, IntPtr.Zero, out targetHandle, 0, false, 0x1)) {
+				MessageBox.Show("Failed to close mutex: " + Marshal.GetLastWin32Error(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+			}
+			Console.WriteLine("Mutex was killed");
 		}
 
 		public Autofarmer() {
@@ -264,28 +309,46 @@ namespace Autofarmer {
 			GrowtopiaPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + @"\Appdata\Local\Growtopia\Growtopia.exe"; // Set as Growtopia's default path
         }
 
-		private void selectFile(object sender, EventArgs e) {
+		private void SelectFile(object sender, EventArgs e) {
 			DialogResult result = fileSelectDialog.ShowDialog();
 			if (result == DialogResult.OK) {
 				GrowtopiaPath = fileSelectDialog.FileName;
 			}
 		}
 
-		private void openGrowtopia(object sender, EventArgs e) {
+		private void OpenGrowtopia(object sender, EventArgs e) {
 			if (GrowtopiaPath != "") { // Make sure Growtopia's path is set
-				fileSelectButton.Enabled = false;
-				growtopia.StartInfo.FileName = GrowtopiaPath;
-				growtopia.Start();
-				statusMessage.Text = "Opening Growtopia...";
-				Thread.Sleep(1000);
-				if (growtopia.WaitForInputIdle(15000)) { // Wait for 15 seconds for process to become idle
-					SetWindowText(growtopia.MainWindowHandle, "Autofarmer by Just Another Channel");
-					statusMessage.Text = "Growtopia opened.";
-					// SWP_NOMOVE means that the x/y arguments should be ignored (0x0002)
-					//SetWindowPos(growtopia.MainWindowHandle, new IntPtr(1), 0, 0, 1024, 768, 0x0002);
-				} else {
-					MessageBox.Show("Idle forever", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				List<Process> suspendedProcesses = new List<Process>();
+				if (processes.Count > 0) {
+					foreach (Process process in processes) {
+						SuspendProcess(process);
+						suspendedProcesses.Add(process);
+					}
 				}
+				for (int i = 0; i < numberInput.Value; i++) {
+					if (i != 0) { // We must suspend the previous process
+						SuspendProcess(processes[processes.Count - 1]);
+						suspendedProcesses.Add(processes[processes.Count - 1]);
+					}
+
+					if (processes.Count > 0) { // We must delete the mutex from previous process
+						CloseProcessHandles(processes[processes.Count - 1]); // It's already suspended so we're fine
+					}
+
+                    Process growtopia = new Process(); // New growtopia process
+					fileSelectButton.Enabled = false;
+					openGTButton.Enabled = false;
+					growtopia.StartInfo.FileName = GrowtopiaPath;
+					processes.Add(growtopia);
+					growtopia.Start();
+					Thread.Sleep(1000);
+				}
+
+				foreach (Process process in suspendedProcesses) {
+					ResumeProcess(process);
+				}
+
+				openGTButton.Enabled = true;
 			} else {
 				MessageBox.Show("Please set a file path for Growtopia!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
 			}
@@ -293,6 +356,10 @@ namespace Autofarmer {
 
 		private static bool Is64Bits() {
 			return Marshal.SizeOf(typeof(IntPtr)) == 8 ? true : false;
+		}
+
+		private void debugCloseMutant(object sender, EventArgs e) {
+			CloseProcessHandles(processes[processes.Count - 1]);
 		}
 	}
 }
