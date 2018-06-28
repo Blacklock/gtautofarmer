@@ -7,12 +7,3 @@ C:\Users\Kasutaja\Desktop\Dev\C#\Autofarmer\Autofarmer\obj\Debug\Autofarmer.Prop
 C:\Users\Kasutaja\Desktop\Dev\C#\Autofarmer\Autofarmer\obj\Debug\Autofarmer.csproj.GenerateResource.Cache
 C:\Users\Kasutaja\Desktop\Dev\C#\Autofarmer\Autofarmer\obj\Debug\Autofarmer.exe
 C:\Users\Kasutaja\Desktop\Dev\C#\Autofarmer\Autofarmer\obj\Debug\Autofarmer.pdb
-C:\Users\ValeriOl\Desktop\Autofarmer\Autofarmer\bin\Debug\Autofarmer.exe.config
-C:\Users\ValeriOl\Desktop\Autofarmer\Autofarmer\obj\Debug\Autofarmer.exe
-C:\Users\ValeriOl\Desktop\Autofarmer\Autofarmer\obj\Debug\Autofarmer.pdb
-C:\Users\ValeriOl\Desktop\Autofarmer\Autofarmer\bin\Debug\Autofarmer.exe
-C:\Users\ValeriOl\Desktop\Autofarmer\Autofarmer\bin\Debug\Autofarmer.pdb
-C:\Users\ValeriOl\Desktop\Autofarmer\Autofarmer\obj\Debug\Autofarmer.csprojResolveAssemblyReference.cache
-C:\Users\ValeriOl\Desktop\Autofarmer\Autofarmer\obj\Debug\Autofarmer.Autofarmer.resources
-C:\Users\ValeriOl\Desktop\Autofarmer\Autofarmer\obj\Debug\Autofarmer.Properties.Resources.resources
-C:\Users\ValeriOl\Desktop\Autofarmer\Autofarmer\obj\Debug\Autofarmer.csproj.GenerateResource.Cache
