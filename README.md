@@ -19,7 +19,7 @@ GTAutoFarmer `kernel32.dll` and `ntdll.dll`.
 ### I got an error!
 
 Open an issue and give as many details as you can. This software has not been tested on a 32-bit system.
-https://msdn.microsoft.com/en-us/library/windows/desktop/ms724251%28v=vs.85%29.aspx
+
 ## How it works
 
 Growtopia and many other games only allow one instance of the game running at a time and check it with a mutant handle. 
@@ -43,8 +43,6 @@ he wants to open multiple, we won't resume any Growtopia.exe's till the very end
 ## Authors
 
 * **Just Another Channel** - *Author* - [YouTube](https://youtube.com/c/justanotherchannels)
-
-See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
 
 ## License
 
