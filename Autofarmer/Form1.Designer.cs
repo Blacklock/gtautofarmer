@@ -28,6 +28,7 @@
 			this.fileNameDisplayer = new System.Windows.Forms.TextBox();
 			this.openGTButton = new System.Windows.Forms.Button();
 			this.button1 = new System.Windows.Forms.Button();
+			this.statusMessage = new System.Windows.Forms.Label();
 			this.SuspendLayout();
 			// 
 			// fileSelectDialog
@@ -75,13 +76,24 @@
 			this.button1.TabIndex = 1;
 			this.button1.Text = "Debug: Close mutant";
 			this.button1.UseVisualStyleBackColor = true;
-			this.button1.Click += new System.EventHandler(this.closeProcessMutex);
+			this.button1.Click += new System.EventHandler(this.listProcessHandles);
+			// 
+			// statusMessage
+			// 
+			this.statusMessage.AutoSize = true;
+			this.statusMessage.Location = new System.Drawing.Point(154, 43);
+			this.statusMessage.MaximumSize = new System.Drawing.Size(300, 0);
+			this.statusMessage.Name = "statusMessage";
+			this.statusMessage.Size = new System.Drawing.Size(121, 13);
+			this.statusMessage.TabIndex = 2;
+			this.statusMessage.Text = "The autofarmer is ready.";
 			// 
 			// Autofarmer
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(497, 391);
+			this.Controls.Add(this.statusMessage);
 			this.Controls.Add(this.button1);
 			this.Controls.Add(this.openGTButton);
 			this.Controls.Add(this.fileNameDisplayer);
@@ -102,6 +114,7 @@
 		private System.Windows.Forms.TextBox fileNameDisplayer;
 		private System.Windows.Forms.Button openGTButton;
 		private System.Windows.Forms.Button button1;
+		private System.Windows.Forms.Label statusMessage;
 	}
 }
 
