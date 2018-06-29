@@ -90,11 +90,11 @@
 			// 
 			// debugButton
 			// 
-			this.debugButton.Location = new System.Drawing.Point(27, 186);
+			this.debugButton.Location = new System.Drawing.Point(12, 211);
 			this.debugButton.Name = "debugButton";
-			this.debugButton.Size = new System.Drawing.Size(136, 23);
+			this.debugButton.Size = new System.Drawing.Size(188, 23);
 			this.debugButton.TabIndex = 1;
-			this.debugButton.Text = "Debug: Close mutant";
+			this.debugButton.Text = "Debug Function";
 			this.debugButton.UseVisualStyleBackColor = true;
 			this.debugButton.Click += new System.EventHandler(this.debugCloseMutant);
 			// 
@@ -134,6 +134,7 @@
 			// 
 			this.processList.AllowUserToAddRows = false;
 			this.processList.AllowUserToDeleteRows = false;
+			this.processList.AllowUserToResizeColumns = false;
 			this.processList.AllowUserToResizeRows = false;
 			this.processList.BackgroundColor = System.Drawing.SystemColors.ControlLight;
 			this.processList.CellBorderStyle = System.Windows.Forms.DataGridViewCellBorderStyle.None;
@@ -192,9 +193,9 @@
 			// 
 			// Active
 			// 
-			this.Active.HeaderText = "Active";
+			this.Active.HeaderText = "Active Autofarmer";
 			this.Active.Name = "Active";
-			this.Active.Width = 60;
+			this.Active.Width = 80;
 			// 
 			// Multibox
 			// 
@@ -204,9 +205,9 @@
 			// 
 			// PID
 			// 
-			this.PID.HeaderText = "Process PID";
+			this.PID.HeaderText = "Process ID";
 			this.PID.Name = "PID";
-			this.PID.Width = 90;
+			this.PID.Width = 60;
 			// 
 			// settingsLabel1
 			// 
@@ -240,6 +241,7 @@
 			this.autoFarmerTypeOK.TabIndex = 7;
 			this.autoFarmerTypeOK.Text = "OK";
 			this.autoFarmerTypeOK.UseVisualStyleBackColor = true;
+			this.autoFarmerTypeOK.Click += new System.EventHandler(this.changeAutofarmer);
 			// 
 			// settingsLabel2
 			// 
@@ -271,6 +273,7 @@
 			this.multiboxOK.TabIndex = 10;
 			this.multiboxOK.Text = "OK";
 			this.multiboxOK.UseVisualStyleBackColor = true;
+			this.multiboxOK.Click += new System.EventHandler(this.changeMultibox);
 			// 
 			// Autofarmer
 			// 
@@ -311,11 +314,6 @@
 		private System.Windows.Forms.Label statusMessage;
 		private System.Windows.Forms.NumericUpDown numberInput;
 		private System.Windows.Forms.DataGridView processList;
-		private System.Windows.Forms.DataGridViewCheckBoxColumn Checkbox;
-		private System.Windows.Forms.DataGridViewTextBoxColumn Number;
-		private System.Windows.Forms.DataGridViewTextBoxColumn Active;
-		private System.Windows.Forms.DataGridViewTextBoxColumn Multibox;
-		private System.Windows.Forms.DataGridViewTextBoxColumn PID;
 		private System.Windows.Forms.Label settingsLabel1;
 		private System.Windows.Forms.ComboBox autoFarmerType;
 		private System.Windows.Forms.Button autoFarmerTypeOK;
@@ -323,6 +321,11 @@
 		private System.Windows.Forms.ToolTip toolTip;
 		private System.Windows.Forms.ComboBox multiboxToggle;
 		private System.Windows.Forms.Button multiboxOK;
+		private System.Windows.Forms.DataGridViewCheckBoxColumn Checkbox;
+		private System.Windows.Forms.DataGridViewTextBoxColumn Number;
+		private System.Windows.Forms.DataGridViewTextBoxColumn Active;
+		private System.Windows.Forms.DataGridViewTextBoxColumn Multibox;
+		private System.Windows.Forms.DataGridViewTextBoxColumn PID;
 	}
 }
 

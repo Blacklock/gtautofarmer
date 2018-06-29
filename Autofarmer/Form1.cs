@@ -108,6 +108,10 @@ namespace Autofarmer {
 		static extern int SetWindowText(IntPtr hWnd, string text);
 
 		private List<Process> processes = new List<Process>(); // List of open Growtopia processes
+		private List<int> multiboxes = new List<int>();
+
+		CheckBox checkbox; // "Select all" checkbox
+		private bool selectAllChecked = false;
 
 		private string _growtopiaPath = "";
 		private string GrowtopiaPath {
@@ -311,7 +315,58 @@ namespace Autofarmer {
 		}
 
 		private void Autofarmer_Load(object sender, EventArgs e) {
-			GrowtopiaPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + @"\Appdata\Local\Growtopia\Growtopia.exe"; // Set as Growtopia's default path
+			// Set as Growtopia's default path
+
+			GrowtopiaPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + @"\Appdata\Local\Growtopia\Growtopia.exe";
+
+			// Dropdown list default values
+
+			autoFarmerType.SelectedIndex = 0;
+			multiboxToggle.SelectedIndex = 0;
+
+			// Create checkbox for "Select all" in processList
+
+			checkbox = new CheckBox();
+			checkbox.Size = new System.Drawing.Size(15, 15);
+			checkbox.BackColor = Color.Transparent;
+
+			checkbox.Padding = new Padding(0);
+			checkbox.Margin = new Padding(0);
+			checkbox.Text = "";
+
+			processList.Controls.Add(checkbox);
+			DataGridViewHeaderCell header = processList.Columns["Checkbox"].HeaderCell;
+			checkbox.Location = new Point(12, 10);
+			checkbox.CheckedChanged += new EventHandler(SelectAll);
+		}
+
+		private void SelectAll(object sender, EventArgs e) {
+			selectAllChecked = !selectAllChecked;
+
+			foreach (DataGridViewRow row in processList.Rows) {
+				DataGridViewCheckBoxCell checkbox = (DataGridViewCheckBoxCell)row.Cells["Checkbox"];
+				checkbox.Value = selectAllChecked;
+				checkbox.Value = !selectAllChecked;
+				checkbox.Value = selectAllChecked;
+			}
+
+			processList.RefreshEdit();
+		}
+
+		private void changeAutofarmer(object sender, EventArgs e) {
+			foreach (DataGridViewRow row in processList.Rows) {
+				if (Convert.ToBoolean(row.Cells["Checkbox"].Value) == true) {
+					row.Cells["Active"].Value = autoFarmerType.SelectedItem.ToString();
+				}
+			}
+		}
+
+		private void changeMultibox(object sender, EventArgs e) {
+			foreach (DataGridViewRow row in processList.Rows) {
+				if (Convert.ToBoolean(row.Cells["Checkbox"].Value) == true) {
+					row.Cells["Multibox"].Value = multiboxToggle.SelectedItem.ToString() == "Enabled" ? "Yes" : "No";
+				}
+			}
 		}
 
 		private void SelectFile(object sender, EventArgs e) {
@@ -346,12 +401,15 @@ namespace Autofarmer {
 					growtopia.StartInfo.FileName = GrowtopiaPath;
 					processes.Add(growtopia);
 					growtopia.Start();
-                    processList.Rows.Add();
+
+					processList.Rows.Add();
 					processList.Rows[processes.Count - 1].Cells["Number"].Value = processes.Count;
 					processList.Rows[processes.Count - 1].Cells["Active"].Value = "None";
 					processList.Rows[processes.Count - 1].Cells["Multibox"].Value = "No";
 					processList.Rows[processes.Count - 1].Cells["PID"].Value = growtopia.Id;
-
+					if (processes.Count == 6) { // Is this the 6th process?
+						checkbox.Location = new Point(4, 10); // If it is, then change header checkbox location due to the scrollbar
+					}
 					Thread.Sleep(800);
 					SetWindowText(growtopia.MainWindowHandle, "Growtopia " + processes.Count);
 				}
@@ -360,6 +418,7 @@ namespace Autofarmer {
 					ResumeProcess(process);
 				}
 				openGTButton.Text = "Open GT (" + processes.Count + " open)";
+				statusMessage.Text = "Growtopias opened!";
 				openGTButton.Enabled = true;
 			} else {
 				MessageBox.Show("Please set a file path for Growtopia!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -371,7 +430,8 @@ namespace Autofarmer {
 		}
 
 		private void debugCloseMutant(object sender, EventArgs e) {
-			CloseProcessHandles(processes[processes.Count - 1]);
+			var x = processList.Rows[0].Cells["Checkbox"].Selected;
+			Console.WriteLine(x);
 		}
 	}
 }
