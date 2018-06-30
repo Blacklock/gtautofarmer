@@ -11,6 +11,7 @@ using System.Windows.Forms;
 using System.IO;
 using System.Diagnostics; // Process
 
+
 namespace Autofarmer {
 	public partial class Autofarmer : Form {
 		private class WS { // Windows structs, different formats of data we'll be receiving
@@ -56,6 +57,7 @@ namespace Autofarmer {
 			}
 		}
 
+		#region DLL Imports
 		[DllImport("ntdll.dll")]
 		// NtQuerySystemInformation gives us data about all the handlers in the system
 		private static extern uint NtQuerySystemInformation(uint SystemInformationClass, IntPtr SystemInformation,
@@ -105,7 +107,15 @@ namespace Autofarmer {
 		static extern int ResumeThread(IntPtr hThread);
 
 		[DllImport("user32.dll")]
+		// Used for sending keystrokes to new window
+		public static extern IntPtr PostMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
+
+		[DllImport("user32.dll", CharSet = CharSet.Auto)]
+		static extern IntPtr SendMessage(IntPtr hWnd, UInt32 Msg, IntPtr wParam, IntPtr lParam);
+
+		[DllImport("user32.dll")]
 		static extern int SetWindowText(IntPtr hWnd, string text);
+		#endregion
 
 		private List<Process> processes = new List<Process>(); // List of open Growtopia processes
 		private List<int> multiboxes = new List<int>();
@@ -113,12 +123,18 @@ namespace Autofarmer {
 		CheckBox checkbox; // "Select all" checkbox
 		private bool selectAllChecked = false;
 
+		private System.Timers.Timer punchTimer;
+		private bool punchAllowed = true;
+
 		private string _growtopiaPath = "";
-		private string GrowtopiaPath {
-			get {
+		private string GrowtopiaPath
+		{
+			get
+			{
 				return _growtopiaPath;
 			}
-			set {
+			set
+			{
 				if (File.Exists(value)) {
 					_growtopiaPath = value;
 					fileSelectDialog.InitialDirectory = _growtopiaPath;
@@ -281,7 +297,9 @@ namespace Autofarmer {
 				SuspendThread(pOpenThread);
 				CloseHandle(pOpenThread);
 			}
+			Console.WriteLine("SUSPENDED");
 		}
+
 		private void ResumeProcess(Process process) {
 			foreach (ProcessThread pT in process.Threads) {
 				// SUSPEND_RESUME = 0x0002
@@ -338,8 +356,12 @@ namespace Autofarmer {
 			DataGridViewHeaderCell header = processList.Columns["Checkbox"].HeaderCell;
 			checkbox.Location = new Point(12, 10);
 			checkbox.CheckedChanged += new EventHandler(SelectAll);
-		}
 
+			// Timer to punch
+			// Set the timer ms with the "Hits" setting
+			punchTimer = new System.Timers.Timer(100);
+			punchTimer.Elapsed += new System.Timers.ElapsedEventHandler(PunchClick);
+		}
 		private void SelectAll(object sender, EventArgs e) {
 			selectAllChecked = !selectAllChecked;
 
@@ -383,12 +405,14 @@ namespace Autofarmer {
 					foreach (Process process in processes) {
 						SuspendProcess(process);
 						suspendedProcesses.Add(process);
+						Thread.Sleep(1000);
 					}
 				}
 				for (int i = 0; i < numberInput.Value; i++) {
 					if (i != 0) { // We must suspend the previous process
 						SuspendProcess(processes[processes.Count - 1]);
 						suspendedProcesses.Add(processes[processes.Count - 1]);
+						Thread.Sleep(1000);
 					}
 
 					if (processes.Count > 0) { // We must delete the mutex from previous process
@@ -429,9 +453,57 @@ namespace Autofarmer {
 			return Marshal.SizeOf(typeof(IntPtr)) == 8 ? true : false;
 		}
 
-		private void debugCloseMutant(object sender, EventArgs e) {
-			var x = processList.Rows[0].Cells["Checkbox"].Selected;
-			Console.WriteLine(x);
+		private void SendClick(Process process, int x, int y, int ?dx = null, int ?dy = null) {
+			if (dx == null) dx = x;
+			if (dy == null) dy = y;
+
+			// Randomize coordinates
+			Random r = new Random();
+			x += r.Next(-10, 10);
+			y += r.Next(-10, 10);
+			if (dx == null && dy == null) {
+				dx = x + r.Next(-2, 2);
+				dy = y + r.Next(-2, 2);
+			} else {
+				dx += r.Next(-10, 10);
+				dy += r.Next(-10, 10);
+			}
+			
+			
+			IntPtr handle = process.MainWindowHandle;
+
+			SendMessage(handle, 0x201, new IntPtr(0x0001), (IntPtr)((y << 16) | (x & 0xffff)));
+			SendMessage(handle, 0x202, new IntPtr(0x0001), (IntPtr)((dy << 16) | (dx & 0xffff)));
+		}
+
+		private bool tog = false;
+
+		private void PunchClick(object source, System.Timers.ElapsedEventArgs e) {
+			if (punchAllowed) {
+				punchAllowed = false;
+				Process[] processes = Process.GetProcessesByName("Growtopia");
+				if (processes.Length > 0) {
+					foreach (Process p in processes) {
+						if (p.MainWindowTitle != "Growtopia 7") {
+							SendClick(p, 950, 700);
+							if (p.MainWindowTitle == "Growtopia 1" || p.MainWindowTitle == "Growtopia 4" || p.MainWindowTitle == "Growtopia") {
+								// Default zoom
+								Thread.Sleep(200);
+								SendClick(p, 575, 390);
+								SendClick(p, 635, 390);
+								//SendClick(p, 695, 300);
+								//SendClick(p, 900, 300);
+							}
+						}
+					}
+				}
+			}
+			punchAllowed = true;
+		}
+
+		private void DebugFunction(object sender, EventArgs e) {
+			tog = !tog;
+			punchTimer.Enabled = tog;
 		}
 	}
 }
