@@ -361,6 +361,23 @@ namespace Autofarmer {
 			// Set the timer ms with the "Hits" setting
 			punchTimer = new System.Timers.Timer(100);
 			punchTimer.Elapsed += new System.Timers.ElapsedEventHandler(PunchClick);
+
+			Process[] previousProcesses = Process.GetProcessesByName("Growtopia");
+			List<Process> sortedProcesses = previousProcesses.OrderBy(s => s.MainWindowTitle).ToList();
+
+			foreach (Process sortedProcess in sortedProcesses) {
+				processes.Add(sortedProcess);
+
+				processList.Rows.Add();
+				processList.Rows[processes.Count - 1].Cells["Number"].Value = processes.Count;
+				processList.Rows[processes.Count - 1].Cells["Active"].Value = "None";
+				processList.Rows[processes.Count - 1].Cells["Multibox"].Value = "No";
+				processList.Rows[processes.Count - 1].Cells["PID"].Value = sortedProcess.Id;
+
+				if (processes.Count == 6) { // Align checkbox
+					checkbox.Location = new Point(4, 10);
+				}
+			}
 		}
 		private void SelectAll(object sender, EventArgs e) {
 			selectAllChecked = !selectAllChecked;
