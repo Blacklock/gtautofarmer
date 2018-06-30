@@ -118,6 +118,8 @@ namespace Autofarmer {
 		#endregion
 
 		private List<Process> processes = new List<Process>(); // List of open Growtopia processes
+		private List<string> magplantAutofarmer = new List<string>(); // Processes running Magplant autofarmer
+
 		private List<int> multiboxes = new List<int>();
 
 		CheckBox checkbox; // "Select all" checkbox
@@ -127,14 +129,11 @@ namespace Autofarmer {
 		private bool punchAllowed = true;
 
 		private string _growtopiaPath = "";
-		private string GrowtopiaPath
-		{
-			get
-			{
+		private string GrowtopiaPath {
+			get {
 				return _growtopiaPath;
 			}
-			set
-			{
+			set {
 				if (File.Exists(value)) {
 					_growtopiaPath = value;
 					fileSelectDialog.InitialDirectory = _growtopiaPath;
@@ -393,9 +392,21 @@ namespace Autofarmer {
 		}
 
 		private void changeAutofarmer(object sender, EventArgs e) {
+			string selectedOption = autoFarmerType.SelectedItem.ToString();
+			string previousActive;
 			foreach (DataGridViewRow row in processList.Rows) {
 				if (Convert.ToBoolean(row.Cells["Checkbox"].Value) == true) {
-					row.Cells["Active"].Value = autoFarmerType.SelectedItem.ToString();
+					previousActive = row.Cells["Active"].Value.ToString();
+                    row.Cells["Active"].Value = selectedOption;
+					if (selectedOption == "None") {
+						if (previousActive == "Magplant") {
+							magplantAutofarmer.Remove(row.Cells["Number"].Value.ToString());
+						}
+					} else if (selectedOption == "Magplant") {
+						if (previousActive == "None") {
+							magplantAutofarmer.Add(row.Cells["Number"].Value.ToString());
+						}
+					}
 				}
 			}
 		}
@@ -470,7 +481,7 @@ namespace Autofarmer {
 			return Marshal.SizeOf(typeof(IntPtr)) == 8 ? true : false;
 		}
 
-		private void SendClick(Process process, int x, int y, int ?dx = null, int ?dy = null) {
+		private void SendClick(Process process, int x, int y, int? dx = null, int? dy = null) {
 			if (dx == null) dx = x;
 			if (dy == null) dy = y;
 
@@ -485,8 +496,7 @@ namespace Autofarmer {
 				dx += r.Next(-10, 10);
 				dy += r.Next(-10, 10);
 			}
-			
-			
+
 			IntPtr handle = process.MainWindowHandle;
 
 			SendMessage(handle, 0x201, new IntPtr(0x0001), (IntPtr)((y << 16) | (x & 0xffff)));
@@ -496,21 +506,27 @@ namespace Autofarmer {
 		private bool tog = false;
 
 		private void PunchClick(object source, System.Timers.ElapsedEventArgs e) {
+			string pNum;
 			if (punchAllowed) {
 				punchAllowed = false;
-				Process[] processes = Process.GetProcessesByName("Growtopia");
-				if (processes.Length > 0) {
-					foreach (Process p in processes) {
-						if (p.MainWindowTitle != "Growtopia 7") {
-							SendClick(p, 950, 700);
-							if (p.MainWindowTitle == "Growtopia 1" || p.MainWindowTitle == "Growtopia 4" || p.MainWindowTitle == "Growtopia") {
-								// Default zoom
-								Thread.Sleep(200);
-								SendClick(p, 575, 390);
-								SendClick(p, 635, 390);
-								//SendClick(p, 695, 300);
-								//SendClick(p, 900, 300);
-							}
+				Process[] gtProcesses = Process.GetProcessesByName("Growtopia");
+				Console.WriteLine("Autofarmer processes:");
+				foreach (Process p in processes) {
+					pNum = p.MainWindowTitle.Remove(0, p.MainWindowTitle.IndexOf(' ') + 1);
+					if (magplantAutofarmer.Contains(pNum)) {
+						Console.WriteLine("Contained.");
+						SendClick(p, 950, 700);
+						if (p.MainWindowTitle == "Growtopia 1" ||
+							p.MainWindowTitle == "Growtopia 4" || 
+							p.MainWindowTitle == "Growtopia 8" ||
+							p.MainWindowTitle == "Growtopia 12" ||
+							p.MainWindowTitle == "Growtopia") {
+
+							// Default zoom position, block
+							SendClick(p, 575, 390);
+							SendClick(p, 635, 390);
+							//SendClick(p, 695, 300);
+							//SendClick(p, 900, 300);
 						}
 					}
 				}
@@ -518,8 +534,9 @@ namespace Autofarmer {
 			punchAllowed = true;
 		}
 
-		private void DebugFunction(object sender, EventArgs e) {
+		private void ToggleAutofarmers(object sender, EventArgs e) {
 			tog = !tog;
+			toggleAutofarmers.Text = tog ? "Autofarmers: On" : "Autofarmers: Off";
 			punchTimer.Enabled = tog;
 		}
 	}
