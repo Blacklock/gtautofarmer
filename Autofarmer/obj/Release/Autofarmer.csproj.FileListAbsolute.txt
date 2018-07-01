@@ -1,9 +1,0 @@
-C:\Users\Kasutaja\Desktop\Dev\C#\Autofarmer\Autofarmer\bin\Release\Autofarmer.exe.config
-C:\Users\Kasutaja\Desktop\Dev\C#\Autofarmer\Autofarmer\bin\Release\Autofarmer.exe
-C:\Users\Kasutaja\Desktop\Dev\C#\Autofarmer\Autofarmer\bin\Release\Autofarmer.pdb
-C:\Users\Kasutaja\Desktop\Dev\C#\Autofarmer\Autofarmer\obj\Release\Autofarmer.csprojResolveAssemblyReference.cache
-C:\Users\Kasutaja\Desktop\Dev\C#\Autofarmer\Autofarmer\obj\Release\Autofarmer.Autofarmer.resources
-C:\Users\Kasutaja\Desktop\Dev\C#\Autofarmer\Autofarmer\obj\Release\Autofarmer.Properties.Resources.resources
-C:\Users\Kasutaja\Desktop\Dev\C#\Autofarmer\Autofarmer\obj\Release\Autofarmer.csproj.GenerateResource.Cache
-C:\Users\Kasutaja\Desktop\Dev\C#\Autofarmer\Autofarmer\obj\Release\Autofarmer.exe
-C:\Users\Kasutaja\Desktop\Dev\C#\Autofarmer\Autofarmer\obj\Release\Autofarmer.pdb
