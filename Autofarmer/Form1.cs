@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Runtime.InteropServices; // For the DllImport
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
 using System.Diagnostics; // Process
@@ -433,7 +434,8 @@ namespace Autofarmer {
 					foreach (Process process in processes) {
 						SuspendProcess(process);
 						suspendedProcesses.Add(process);
-						Thread.Sleep(1000);
+						// TODO: Add "slower opening" option
+						// Thread.Sleep(1000);
 					}
 				}
 				for (int i = 0; i < numberInput.Value; i++) {
@@ -487,8 +489,8 @@ namespace Autofarmer {
 
 			// Randomize coordinates
 			Random r = new Random();
-			x += r.Next(-10, 10);
-			y += r.Next(-10, 10);
+			x += r.Next(-3, 3);
+			y += r.Next(-1, 1);
 			if (dx == null && dy == null) {
 				dx = x + r.Next(-2, 2);
 				dy = y + r.Next(-2, 2);
@@ -498,12 +500,12 @@ namespace Autofarmer {
 			}
 
 			IntPtr handle = process.MainWindowHandle;
-
-			SendMessage(handle, 0x201, new IntPtr(0x0001), (IntPtr)((y << 16) | (x & 0xffff)));
+            SendMessage(handle, 0x201, new IntPtr(0x0001), (IntPtr)((y << 16) | (x & 0xffff)));
 			SendMessage(handle, 0x202, new IntPtr(0x0001), (IntPtr)((dy << 16) | (dx & 0xffff)));
 		}
 
 		private bool tog = false;
+		int punchesTillPlace = 4;
 
 		private void PunchClick(object source, System.Timers.ElapsedEventArgs e) {
 			string pNum;
@@ -515,11 +517,21 @@ namespace Autofarmer {
 					//foreach (Process p in processes) {
 					pNum = p.MainWindowTitle.Remove(0, p.MainWindowTitle.IndexOf(' ') + 1);
 					if (magplantAutofarmer.Contains(pNum)) {
-						Console.WriteLine("Magplant length: " + magplantAutofarmer.Count);
 						SendClick(p, 950, 700);
 						// Default zoom position, block
-						SendClick(p, 575, 390);
-						SendClick(p, 635, 390);
+						punchesTillPlace -= 1;
+						if (punchesTillPlace < 1) {
+							punchesTillPlace = 4;
+							SendClick(p, 575, 390);
+							SendClick(p, 635, 390);
+						}
+						
+						/*IntPtr handle = p.MainWindowHandle;
+						SendMessage(handle, 0x201, new IntPtr(0x0001), (IntPtr)((690 << 16) | (450 & 0xffff)));
+						SendMessage(handle, 0x202, new IntPtr(0x0001), (IntPtr)((693 << 16) | (453 & 0xffff)));
+
+						SendMessage(handle, 0x201, new IntPtr(0x0001), (IntPtr)((690 << 16) | (450 & 0xffff)));
+						SendMessage(handle, 0x202, new IntPtr(0x0001), (IntPtr)((693 << 16) | (453 & 0xffff)));*/
 					}
 				});
 			}
