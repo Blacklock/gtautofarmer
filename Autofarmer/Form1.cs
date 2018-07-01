@@ -358,7 +358,7 @@ namespace Autofarmer {
 
 			// Timer to punch
 			// Set the timer ms with the "Hits" setting
-			punchTimer = new System.Timers.Timer(100);
+			punchTimer = new System.Timers.Timer(150);
 			punchTimer.Elapsed += new System.Timers.ElapsedEventHandler(PunchClick);
 
 			Process[] previousProcesses = Process.GetProcessesByName("Growtopia");
@@ -510,26 +510,18 @@ namespace Autofarmer {
 			if (punchAllowed) {
 				punchAllowed = false;
 				Process[] gtProcesses = Process.GetProcessesByName("Growtopia");
-				Console.WriteLine("Autofarmer processes:");
-				foreach (Process p in processes) {
+				// We must run these asynchroniously
+				System.Threading.Tasks.Parallel.ForEach(processes, p => {
+					//foreach (Process p in processes) {
 					pNum = p.MainWindowTitle.Remove(0, p.MainWindowTitle.IndexOf(' ') + 1);
 					if (magplantAutofarmer.Contains(pNum)) {
-						Console.WriteLine("Contained.");
+						Console.WriteLine("Magplant length: " + magplantAutofarmer.Count);
 						SendClick(p, 950, 700);
-						if (p.MainWindowTitle == "Growtopia 1" ||
-							p.MainWindowTitle == "Growtopia 4" || 
-							p.MainWindowTitle == "Growtopia 8" ||
-							p.MainWindowTitle == "Growtopia 12" ||
-							p.MainWindowTitle == "Growtopia") {
-
-							// Default zoom position, block
-							SendClick(p, 575, 390);
-							SendClick(p, 635, 390);
-							//SendClick(p, 695, 300);
-							//SendClick(p, 900, 300);
-						}
+						// Default zoom position, block
+						SendClick(p, 575, 390);
+						SendClick(p, 635, 390);
 					}
-				}
+				});
 			}
 			punchAllowed = true;
 		}
