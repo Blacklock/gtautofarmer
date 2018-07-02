@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
 using System.Diagnostics; // Process
+using Utilities;
 
 
 namespace Autofarmer {
@@ -87,7 +88,7 @@ namespace Autofarmer {
 		public static extern int NtQueryObject(IntPtr Handle, int ObjectInformationClass, IntPtr ObjectInformation,
 			int ObjectInformationLength, ref int returnLength);
 
-		[DllImport("kernel32.dll", SetLastError = true)] // Display errors
+		[DllImport("kernel32.dll")] // Display errors
 		[return: MarshalAs(UnmanagedType.Bool)]
 		// DuplicateHandle duplicates a handle from an external process to ours
 		// hSourceProcessHandle is the process we duplicate from, hSourceHandle is the handle we duplicate
@@ -118,10 +119,11 @@ namespace Autofarmer {
 		static extern int SetWindowText(IntPtr hWnd, string text);
 		#endregion
 
+		globalKeyboardHook gkh = new globalKeyboardHook();
+
 		private List<Process> processes = new List<Process>(); // List of open Growtopia processes
 		private List<string> magplantAutofarmer = new List<string>(); // Processes running Magplant autofarmer
-
-		private List<int> multiboxes = new List<int>();
+		private List<string> multiboxes = new List<string>();
 
 		CheckBox checkbox; // "Select all" checkbox
 		private bool selectAllChecked = false;
@@ -266,14 +268,18 @@ namespace Autofarmer {
 				}
 
 				string handleName = ViewHandleName(handleInfoStruct, growtopia);
-				if (@"\Sessions\1\BaseNamedObjects\Growtopia" != handleName) {
+				// TODO: Looks like the mutant session number is different for different PCs
+				// Maybe just check if the string contains basenamedobjects/growtopia and starts with sessions?
+				if (handleName != null && handleName.StartsWith(@"\Sessions\") && handleName.EndsWith(@"\BaseNamedObjects\Growtopia")) {
+					handles.Add(handleInfoStruct);
+					Console.WriteLine("PID {0,7} Pointer {1,12} Type {2,4} Name {3}", handleInfoStruct.ProcessID.ToString(),
+																					  handleInfoStruct.Object_Pointer.ToString(),
+																					  handleInfoStruct.ObjectTypeNumber.ToString(),
+																					  handleName);
+				} else {
 					continue; // This is not a handle we're looking for
 				}
-				handles.Add(handleInfoStruct);
-				Console.WriteLine("PID {0,7} Pointer {1,12} Type {2,4} Name {3}", handleInfoStruct.ProcessID.ToString(),
-																				  handleInfoStruct.Object_Pointer.ToString(),
-																				  handleInfoStruct.ObjectTypeNumber.ToString(),
-																				  handleName);
+				
 			}
 
 			Console.WriteLine("Closing mutexes?");
@@ -371,13 +377,16 @@ namespace Autofarmer {
 				processList.Rows.Add();
 				processList.Rows[processes.Count - 1].Cells["Number"].Value = processes.Count;
 				processList.Rows[processes.Count - 1].Cells["Active"].Value = "None";
-				processList.Rows[processes.Count - 1].Cells["Multibox"].Value = "No";
+				processList.Rows[processes.Count - 1].Cells["Multibox"].Value = "Disabled";
 				processList.Rows[processes.Count - 1].Cells["PID"].Value = sortedProcess.Id;
 
 				if (processes.Count == 6) { // Align checkbox
 					checkbox.Location = new Point(4, 10);
 				}
 			}
+
+			openGTButton.Text = "Open GT (" + processes.Count + " open)";
+			statusMessage.Text = "Previous growtopias opened!";
 		}
 		private void SelectAll(object sender, EventArgs e) {
 			selectAllChecked = !selectAllChecked;
@@ -396,9 +405,9 @@ namespace Autofarmer {
 			string selectedOption = autoFarmerType.SelectedItem.ToString();
 			string previousActive;
 			foreach (DataGridViewRow row in processList.Rows) {
-				if (Convert.ToBoolean(row.Cells["Checkbox"].Value) == true) {
+				if (Convert.ToBoolean(row.Cells["Checkbox"].Value)) {
 					previousActive = row.Cells["Active"].Value.ToString();
-                    row.Cells["Active"].Value = selectedOption;
+					row.Cells["Active"].Value = selectedOption;
 					if (selectedOption == "None") {
 						if (previousActive == "Magplant") {
 							magplantAutofarmer.Remove(row.Cells["Number"].Value.ToString());
@@ -413,9 +422,17 @@ namespace Autofarmer {
 		}
 
 		private void changeMultibox(object sender, EventArgs e) {
+			string selectedOption = multiboxToggle.SelectedItem.ToString();
+			string previousOption;
 			foreach (DataGridViewRow row in processList.Rows) {
-				if (Convert.ToBoolean(row.Cells["Checkbox"].Value) == true) {
-					row.Cells["Multibox"].Value = multiboxToggle.SelectedItem.ToString() == "Enabled" ? "Yes" : "No";
+				if (Convert.ToBoolean(row.Cells["Checkbox"].Value)) {
+					previousOption = row.Cells["Multibox"].Value.ToString();
+					row.Cells["Multibox"].Value = selectedOption;
+					if (selectedOption == "Disabled" && previousOption == "Enabled") {
+						multiboxes.Remove(row.Cells["Number"].Value.ToString());
+					} else if (selectedOption == "Enabled" && previousOption == "Disabled") {
+						multiboxes.Add(row.Cells["Number"].Value.ToString());
+					}
 				}
 			}
 		}
@@ -435,7 +452,7 @@ namespace Autofarmer {
 						SuspendProcess(process);
 						suspendedProcesses.Add(process);
 						// TODO: Add "slower opening" option
-						// Thread.Sleep(1000);
+						Thread.Sleep(1000);
 					}
 				}
 				for (int i = 0; i < numberInput.Value; i++) {
@@ -459,12 +476,13 @@ namespace Autofarmer {
 					processList.Rows.Add();
 					processList.Rows[processes.Count - 1].Cells["Number"].Value = processes.Count;
 					processList.Rows[processes.Count - 1].Cells["Active"].Value = "None";
-					processList.Rows[processes.Count - 1].Cells["Multibox"].Value = "No";
+					processList.Rows[processes.Count - 1].Cells["Multibox"].Value = "Disabled";
 					processList.Rows[processes.Count - 1].Cells["PID"].Value = growtopia.Id;
 					if (processes.Count == 6) { // Is this the 6th process?
 						checkbox.Location = new Point(4, 10); // If it is, then change header checkbox location due to the scrollbar
 					}
 					Thread.Sleep(800);
+					growtopia.WaitForInputIdle();
 					SetWindowText(growtopia.MainWindowHandle, "Growtopia " + processes.Count);
 				}
 
@@ -500,12 +518,12 @@ namespace Autofarmer {
 			}
 
 			IntPtr handle = process.MainWindowHandle;
-            SendMessage(handle, 0x201, new IntPtr(0x0001), (IntPtr)((y << 16) | (x & 0xffff)));
+			SendMessage(handle, 0x201, new IntPtr(0x0001), (IntPtr)((y << 16) | (x & 0xffff)));
 			SendMessage(handle, 0x202, new IntPtr(0x0001), (IntPtr)((dy << 16) | (dx & 0xffff)));
 		}
 
-		private bool tog = false;
-		int punchesTillPlace = 4;
+		private bool toggleAutofarmerBool = false;
+		private bool toggleMultiboxBool = false;
 
 		private void PunchClick(object source, System.Timers.ElapsedEventArgs e) {
 			string pNum;
@@ -515,23 +533,18 @@ namespace Autofarmer {
 				// We must run these asynchroniously
 				System.Threading.Tasks.Parallel.ForEach(processes, p => {
 					//foreach (Process p in processes) {
-					pNum = p.MainWindowTitle.Remove(0, p.MainWindowTitle.IndexOf(' ') + 1);
+					if (p.MainWindowTitle == "Growtopia") {
+						pNum = "1";
+					} else {
+						pNum = p.MainWindowTitle.Remove(0, p.MainWindowTitle.IndexOf(' ') + 1);
+					}
+
 					if (magplantAutofarmer.Contains(pNum)) {
 						SendClick(p, 950, 700);
-						// Default zoom position, block
-						punchesTillPlace -= 1;
-						if (punchesTillPlace < 1) {
-							punchesTillPlace = 4;
-							SendClick(p, 575, 390);
-							SendClick(p, 635, 390);
-						}
-						
-						/*IntPtr handle = p.MainWindowHandle;
-						SendMessage(handle, 0x201, new IntPtr(0x0001), (IntPtr)((690 << 16) | (450 & 0xffff)));
-						SendMessage(handle, 0x202, new IntPtr(0x0001), (IntPtr)((693 << 16) | (453 & 0xffff)));
 
-						SendMessage(handle, 0x201, new IntPtr(0x0001), (IntPtr)((690 << 16) | (450 & 0xffff)));
-						SendMessage(handle, 0x202, new IntPtr(0x0001), (IntPtr)((693 << 16) | (453 & 0xffff)));*/
+						// Default zoom position, block
+						SendClick(p, 575, 390);
+						SendClick(p, 635, 390);
 					}
 				});
 			}
@@ -539,9 +552,47 @@ namespace Autofarmer {
 		}
 
 		private void ToggleAutofarmers(object sender, EventArgs e) {
-			tog = !tog;
-			toggleAutofarmers.Text = tog ? "Autofarmers: On" : "Autofarmers: Off";
-			punchTimer.Enabled = tog;
+			toggleAutofarmerBool = !toggleAutofarmerBool;
+			toggleAutofarmer.Text = toggleAutofarmerBool ? "Autofarmers: On" : "Autofarmers: Off";
+			punchTimer.Enabled = toggleAutofarmerBool;
+		}
+
+		private void ToggleMultiboxes(object sender, EventArgs e) {
+			toggleMultiboxBool = !toggleMultiboxBool;
+			toggleMultibox.Text = toggleMultiboxBool ? "Multibox: On" : "Multibox: Off";
+			if (toggleMultiboxBool) {
+				gkh.KeyDown += new KeyEventHandler(gkh_KeyUp);
+				gkh.KeyUp += new KeyEventHandler(gkh_KeyDown);
+			} else {
+				gkh.KeyDown -= new KeyEventHandler(gkh_KeyUp);
+				gkh.KeyUp -= new KeyEventHandler(gkh_KeyDown);
+			}
+		}
+
+		private void gkh_KeyUp(object sender, KeyEventArgs e) {
+			e.Handled = true; // Make sure we block the outgoing keypress as we'll be resending it anyway
+			string key = e.KeyCode.ToString();
+			if (key != "None") {
+				IntPtr hWnd;
+				foreach (Process process in processes) {
+					hWnd = process.MainWindowHandle;
+					// WM_KEYDOWN = 0x100
+					PostMessage(hWnd, 0x100, (IntPtr)(e.KeyCode), IntPtr.Zero);
+				}
+			}
+		}
+
+		private void gkh_KeyDown(object sender, KeyEventArgs e) {
+			e.Handled = true;
+			string key = e.KeyCode.ToString();
+			if (key != "None") {
+				IntPtr hWnd;
+				foreach (Process process in processes) {
+					hWnd = process.MainWindowHandle;
+					// WM_KEYUP = 0x101
+					PostMessage(hWnd, 0x101, (IntPtr)(e.KeyCode), IntPtr.Zero);
+				}
+			}
 		}
 	}
 }

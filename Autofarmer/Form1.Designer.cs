@@ -24,14 +24,14 @@
 		/// </summary>
 		private void InitializeComponent() {
 			this.components = new System.ComponentModel.Container();
-			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle13 = new System.Windows.Forms.DataGridViewCellStyle();
-			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle14 = new System.Windows.Forms.DataGridViewCellStyle();
-			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle15 = new System.Windows.Forms.DataGridViewCellStyle();
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
 			this.fileSelectDialog = new System.Windows.Forms.OpenFileDialog();
 			this.fileSelectButton = new System.Windows.Forms.Button();
 			this.fileNameDisplayer = new System.Windows.Forms.TextBox();
 			this.openGTButton = new System.Windows.Forms.Button();
-			this.toggleAutofarmers = new System.Windows.Forms.Button();
+			this.toggleAutofarmer = new System.Windows.Forms.Button();
 			this.statusMessage = new System.Windows.Forms.Label();
 			this.numberInput = new System.Windows.Forms.NumericUpDown();
 			this.processList = new System.Windows.Forms.DataGridView();
@@ -47,6 +47,7 @@
 			this.toolTip = new System.Windows.Forms.ToolTip(this.components);
 			this.multiboxToggle = new System.Windows.Forms.ComboBox();
 			this.multiboxOK = new System.Windows.Forms.Button();
+			this.toggleMultibox = new System.Windows.Forms.Button();
 			((System.ComponentModel.ISupportInitialize)(this.numberInput)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.processList)).BeginInit();
 			this.SuspendLayout();
@@ -88,15 +89,15 @@
 			this.openGTButton.UseVisualStyleBackColor = true;
 			this.openGTButton.Click += new System.EventHandler(this.OpenGrowtopia);
 			// 
-			// toggleAutofarmers
+			// toggleAutofarmer
 			// 
-			this.toggleAutofarmers.Location = new System.Drawing.Point(12, 210);
-			this.toggleAutofarmers.Name = "toggleAutofarmers";
-			this.toggleAutofarmers.Size = new System.Drawing.Size(188, 23);
-			this.toggleAutofarmers.TabIndex = 1;
-			this.toggleAutofarmers.Text = "Autofarmers: Off";
-			this.toggleAutofarmers.UseVisualStyleBackColor = true;
-			this.toggleAutofarmers.Click += new System.EventHandler(this.ToggleAutofarmers);
+			this.toggleAutofarmer.Location = new System.Drawing.Point(15, 181);
+			this.toggleAutofarmer.Name = "toggleAutofarmer";
+			this.toggleAutofarmer.Size = new System.Drawing.Size(185, 23);
+			this.toggleAutofarmer.TabIndex = 1;
+			this.toggleAutofarmer.Text = "Autofarmers: Off";
+			this.toggleAutofarmer.UseVisualStyleBackColor = true;
+			this.toggleAutofarmer.Click += new System.EventHandler(this.ToggleAutofarmers);
 			// 
 			// statusMessage
 			// 
@@ -139,14 +140,14 @@
 			this.processList.BackgroundColor = System.Drawing.SystemColors.ControlLight;
 			this.processList.CellBorderStyle = System.Windows.Forms.DataGridViewCellBorderStyle.None;
 			this.processList.ColumnHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.None;
-			dataGridViewCellStyle13.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-			dataGridViewCellStyle13.BackColor = System.Drawing.SystemColors.Control;
-			dataGridViewCellStyle13.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			dataGridViewCellStyle13.ForeColor = System.Drawing.SystemColors.WindowText;
-			dataGridViewCellStyle13.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-			dataGridViewCellStyle13.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-			dataGridViewCellStyle13.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-			this.processList.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle13;
+			dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+			dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
+			dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
+			dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+			dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+			dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+			this.processList.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
 			this.processList.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
 			this.processList.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.Checkbox,
@@ -154,25 +155,25 @@
             this.Active,
             this.Multibox,
             this.PID});
-			dataGridViewCellStyle14.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-			dataGridViewCellStyle14.BackColor = System.Drawing.SystemColors.Window;
-			dataGridViewCellStyle14.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			dataGridViewCellStyle14.ForeColor = System.Drawing.SystemColors.ControlText;
-			dataGridViewCellStyle14.SelectionBackColor = System.Drawing.SystemColors.Window;
-			dataGridViewCellStyle14.SelectionForeColor = System.Drawing.SystemColors.ControlText;
-			dataGridViewCellStyle14.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-			this.processList.DefaultCellStyle = dataGridViewCellStyle14;
+			dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+			dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Window;
+			dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.ControlText;
+			dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Window;
+			dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.ControlText;
+			dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+			this.processList.DefaultCellStyle = dataGridViewCellStyle2;
 			this.processList.EditMode = System.Windows.Forms.DataGridViewEditMode.EditOnKeystroke;
 			this.processList.Location = new System.Drawing.Point(206, 83);
 			this.processList.Name = "processList";
-			dataGridViewCellStyle15.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-			dataGridViewCellStyle15.BackColor = System.Drawing.SystemColors.Control;
-			dataGridViewCellStyle15.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			dataGridViewCellStyle15.ForeColor = System.Drawing.SystemColors.WindowText;
-			dataGridViewCellStyle15.SelectionBackColor = System.Drawing.SystemColors.Control;
-			dataGridViewCellStyle15.SelectionForeColor = System.Drawing.SystemColors.WindowText;
-			dataGridViewCellStyle15.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-			this.processList.RowHeadersDefaultCellStyle = dataGridViewCellStyle15;
+			dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+			dataGridViewCellStyle3.BackColor = System.Drawing.SystemColors.Control;
+			dataGridViewCellStyle3.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			dataGridViewCellStyle3.ForeColor = System.Drawing.SystemColors.WindowText;
+			dataGridViewCellStyle3.SelectionBackColor = System.Drawing.SystemColors.Control;
+			dataGridViewCellStyle3.SelectionForeColor = System.Drawing.SystemColors.WindowText;
+			dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+			this.processList.RowHeadersDefaultCellStyle = dataGridViewCellStyle3;
 			this.processList.RowHeadersVisible = false;
 			this.processList.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
 			this.processList.Size = new System.Drawing.Size(279, 150);
@@ -260,8 +261,8 @@
 			this.multiboxToggle.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.multiboxToggle.FormattingEnabled = true;
 			this.multiboxToggle.Items.AddRange(new object[] {
-            "Disabled",
-            "Enabled"});
+            "Enabled",
+            "Disabled"});
 			this.multiboxToggle.Location = new System.Drawing.Point(15, 140);
 			this.multiboxToggle.Name = "multiboxToggle";
 			this.multiboxToggle.Size = new System.Drawing.Size(134, 21);
@@ -277,11 +278,22 @@
 			this.multiboxOK.UseVisualStyleBackColor = true;
 			this.multiboxOK.Click += new System.EventHandler(this.changeMultibox);
 			// 
+			// toggleMultibox
+			// 
+			this.toggleMultibox.Location = new System.Drawing.Point(15, 210);
+			this.toggleMultibox.Name = "toggleMultibox";
+			this.toggleMultibox.Size = new System.Drawing.Size(185, 23);
+			this.toggleMultibox.TabIndex = 11;
+			this.toggleMultibox.Text = "Multibox: Off";
+			this.toggleMultibox.UseVisualStyleBackColor = true;
+			this.toggleMultibox.Click += new System.EventHandler(this.ToggleMultiboxes);
+			// 
 			// Autofarmer
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(497, 246);
+			this.Controls.Add(this.toggleMultibox);
 			this.Controls.Add(this.multiboxOK);
 			this.Controls.Add(this.multiboxToggle);
 			this.Controls.Add(this.settingsLabel2);
@@ -291,7 +303,7 @@
 			this.Controls.Add(this.processList);
 			this.Controls.Add(this.numberInput);
 			this.Controls.Add(this.statusMessage);
-			this.Controls.Add(this.toggleAutofarmers);
+			this.Controls.Add(this.toggleAutofarmer);
 			this.Controls.Add(this.openGTButton);
 			this.Controls.Add(this.fileNameDisplayer);
 			this.Controls.Add(this.fileSelectButton);
@@ -313,7 +325,7 @@
 		private System.Windows.Forms.Button fileSelectButton;
 		private System.Windows.Forms.TextBox fileNameDisplayer;
 		private System.Windows.Forms.Button openGTButton;
-		private System.Windows.Forms.Button toggleAutofarmers;
+		private System.Windows.Forms.Button toggleAutofarmer;
 		private System.Windows.Forms.Label statusMessage;
 		private System.Windows.Forms.NumericUpDown numberInput;
 		private System.Windows.Forms.DataGridView processList;
@@ -329,6 +341,7 @@
 		private System.Windows.Forms.DataGridViewTextBoxColumn Active;
 		private System.Windows.Forms.DataGridViewTextBoxColumn Multibox;
 		private System.Windows.Forms.DataGridViewTextBoxColumn PID;
+		private System.Windows.Forms.Button toggleMultibox;
 	}
 }
 
