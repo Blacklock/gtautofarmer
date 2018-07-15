@@ -11,11 +11,9 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
 using System.Diagnostics; // Process
-using Utilities;
-
 
 namespace Autofarmer {
-	public partial class Autofarmer : Form {
+	public partial class Autofarm : Form {
 		private class WS { // Windows structs, different formats of data we'll be receiving
 						   // LayoutKind.Sequential to store the fields correctly ordered in memory
 						   // Pack=1 if we need to read a byte at a time
@@ -88,7 +86,7 @@ namespace Autofarmer {
 		public static extern int NtQueryObject(IntPtr Handle, int ObjectInformationClass, IntPtr ObjectInformation,
 			int ObjectInformationLength, ref int returnLength);
 
-		[DllImport("kernel32.dll")] // Display errors
+		[DllImport("kernel32.dll")]
 		[return: MarshalAs(UnmanagedType.Bool)]
 		// DuplicateHandle duplicates a handle from an external process to ours
 		// hSourceProcessHandle is the process we duplicate from, hSourceHandle is the handle we duplicate
@@ -118,8 +116,6 @@ namespace Autofarmer {
 		[DllImport("user32.dll")]
 		static extern int SetWindowText(IntPtr hWnd, string text);
 		#endregion
-
-		globalKeyboardHook gkh = new globalKeyboardHook();
 
 		private List<Process> processes = new List<Process>(); // List of open Growtopia processes
 		private List<string> magplantAutofarmer = new List<string>(); // Processes running Magplant autofarmer
@@ -334,7 +330,7 @@ namespace Autofarmer {
 			Console.WriteLine("Mutex was killed");
 		}
 
-		public Autofarmer() {
+		public Autofarm() {
 			InitializeComponent(); // Set size etc. and run Autofarmer_Load()
 		}
 
@@ -451,9 +447,9 @@ namespace Autofarmer {
 					foreach (Process process in processes) {
 						SuspendProcess(process);
 						suspendedProcesses.Add(process);
-						// TODO: Add "slower opening" option
-						Thread.Sleep(1000);
 					}
+					// TODO: Add "slower opening" option
+					Thread.Sleep(1000);
 				}
 				for (int i = 0; i < numberInput.Value; i++) {
 					if (i != 0) { // We must suspend the previous process
@@ -481,7 +477,8 @@ namespace Autofarmer {
 					if (processes.Count == 6) { // Is this the 6th process?
 						checkbox.Location = new Point(4, 10); // If it is, then change header checkbox location due to the scrollbar
 					}
-					Thread.Sleep(800);
+					// TODO: Add slower opening option, increase this int
+					Thread.Sleep(1000);
 					growtopia.WaitForInputIdle();
 					SetWindowText(growtopia.MainWindowHandle, "Growtopia " + processes.Count);
 				}
@@ -524,7 +521,6 @@ namespace Autofarmer {
 
 		private bool toggleAutofarmerBool = false;
 		private bool toggleMultiboxBool = false;
-
 		private void PunchClick(object source, System.Timers.ElapsedEventArgs e) {
 			string pNum;
 			if (punchAllowed) {
@@ -540,11 +536,14 @@ namespace Autofarmer {
 					}
 
 					if (magplantAutofarmer.Contains(pNum)) {
-						SendClick(p, 950, 700);
+						
 
 						// Default zoom position, block
 						SendClick(p, 575, 390);
 						SendClick(p, 635, 390);
+
+						// Punch
+						SendClick(p, 950, 700);
 					}
 				});
 			}
@@ -561,38 +560,111 @@ namespace Autofarmer {
 			toggleMultiboxBool = !toggleMultiboxBool;
 			toggleMultibox.Text = toggleMultiboxBool ? "Multibox: On" : "Multibox: Off";
 			if (toggleMultiboxBool) {
-				gkh.KeyDown += new KeyEventHandler(gkh_KeyUp);
-				gkh.KeyUp += new KeyEventHandler(gkh_KeyDown);
+				HookListener();
 			} else {
-				gkh.KeyDown -= new KeyEventHandler(gkh_KeyUp);
-				gkh.KeyUp -= new KeyEventHandler(gkh_KeyDown);
+				UnhookListener();
 			}
 		}
 
-		private void gkh_KeyUp(object sender, KeyEventArgs e) {
+		/*private void ToggleMultiboxes(object sender, EventArgs e) {
+			toggleMultiboxBool = !toggleMultiboxBool;
+			toggleMultibox.Text = toggleMultiboxBool ? "Multibox: On" : "Multibox: Off";
+			if (toggleMultiboxBool) {
+				mouseHook.LeftButtonDown += new MouseHook.MouseHookCallback(HookMouseDown);
+				mouseHook.LeftButtonUp += new MouseHook.MouseHookCallback(HookMouseUp);
+
+				gkh.KeyDown += new KeyEventHandler(HookKeyDown);
+				gkh.KeyUp += new KeyEventHandler(HookKeyUp);
+
+				mouseHook.Install();
+			} else {
+				mouseHook.LeftButtonDown -= new MouseHook.MouseHookCallback(HookMouseDown);
+				mouseHook.LeftButtonUp -= new MouseHook.MouseHookCallback(HookMouseUp);
+
+				gkh.KeyDown -= new KeyEventHandler(HookKeyDown);
+				gkh.KeyUp -= new KeyEventHandler(HookKeyUp);
+
+				mouseHook.Uninstall();
+			}
+		}*/
+
+		/*private void HookMouseDown(MouseHook.MSLLHOOKSTRUCT e) {
+			// Must say that this is an awful way to do this
+			// A global hook, and filtering out results when the targeted process isn't focused?
+			// I should look into another way of doing this once I have time...
+			if (GetForegroundProcessName() == "Growtopia") {
+				IntPtr hWnd;
+				foreach (Process process in processes) {
+					hWnd = process.MainWindowHandle;
+					PostMessage(hWnd, 0x201, new IntPtr(0x1), (IntPtr)((e.pt.y << 16) | (e.pt.x & 0xffff)));
+				}
+				Console.WriteLine("Something something, mouse event?");
+			}
+		}
+
+		private void HookMouseUp(MouseHook.MSLLHOOKSTRUCT e) {
+			// Must say that this is an awful way to do this
+			// A global hook, and filtering out results when the targeted process isn't focused?
+			// I should look into another way of doing this once I have time...
+			if (GetForegroundProcessName() == "Growtopia") {
+				IntPtr hWnd;
+				foreach (Process process in processes) {
+					hWnd = process.MainWindowHandle;
+					PostMessage(hWnd, 0x202, new IntPtr(0x0), (IntPtr)((e.pt.y << 16) | (e.pt.x & 0xffff)));
+				}
+				Console.WriteLine("RECEIVED A MOUSE EVENT");
+			}
+		}
+
+		private void HookKeyDown(object sender, KeyEventArgs e) {
 			e.Handled = true; // Make sure we block the outgoing keypress as we'll be resending it anyway
 			string key = e.KeyCode.ToString();
-			if (key != "None") {
-				IntPtr hWnd;
-				foreach (Process process in processes) {
-					hWnd = process.MainWindowHandle;
-					// WM_KEYDOWN = 0x100
-					PostMessage(hWnd, 0x100, (IntPtr)(e.KeyCode), IntPtr.Zero);
-				}
+			IntPtr hWnd;
+			foreach (Process process in processes) {
+				hWnd = process.MainWindowHandle;
+				// WM_KEYDOWN = 0x100
+				PostMessage(hWnd, 0x100, (IntPtr)e.KeyCode, IntPtr.Zero);
 			}
 		}
 
-		private void gkh_KeyDown(object sender, KeyEventArgs e) {
+		private void HookKeyUp(object sender, KeyEventArgs e) {
 			e.Handled = true;
 			string key = e.KeyCode.ToString();
-			if (key != "None") {
-				IntPtr hWnd;
-				foreach (Process process in processes) {
-					hWnd = process.MainWindowHandle;
-					// WM_KEYUP = 0x101
-					PostMessage(hWnd, 0x101, (IntPtr)(e.KeyCode), IntPtr.Zero);
-				}
+			IntPtr hWnd;
+			foreach (Process process in processes) {
+				hWnd = process.MainWindowHandle;
+				// WM_KEYUP = 0x101
+				PostMessage(hWnd, 0x101, (IntPtr)e.KeyCode, IntPtr.Zero);
 			}
 		}
+
+		// Source: https://stackoverflow.com/a/97517/5019032
+		
+		[System.Runtime.InteropServices.DllImport("user32.dll")]
+		private static extern IntPtr GetForegroundWindow();
+
+		[System.Runtime.InteropServices.DllImport("user32.dll")]
+		private static extern Int32 GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
+
+		private string GetForegroundProcessName() {
+			IntPtr hwnd = GetForegroundWindow();
+
+			if (hwnd == null)
+				return "Unknown";
+
+			uint pid;
+			GetWindowThreadProcessId(hwnd, out pid);
+
+			foreach (System.Diagnostics.Process p in System.Diagnostics.Process.GetProcesses()) {
+				if (p.Id == pid)
+					return p.ProcessName;
+			}
+
+			return "Unknown";
+		}
+		*/
+		private void button1_Click(object sender, EventArgs e) {
+		}
+		
 	}
 }

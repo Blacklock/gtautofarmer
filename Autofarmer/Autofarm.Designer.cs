@@ -1,5 +1,5 @@
 ﻿namespace Autofarmer {
-	partial class Autofarmer {
+	partial class Autofarm {
 		/// <summary>
 		/// Required designer variable.
 		/// </summary>
@@ -48,6 +48,7 @@
 			this.multiboxToggle = new System.Windows.Forms.ComboBox();
 			this.multiboxOK = new System.Windows.Forms.Button();
 			this.toggleMultibox = new System.Windows.Forms.Button();
+			this.button1 = new System.Windows.Forms.Button();
 			((System.ComponentModel.ISupportInitialize)(this.numberInput)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.processList)).BeginInit();
 			this.SuspendLayout();
@@ -113,23 +114,23 @@
 			// 
 			this.numberInput.Location = new System.Drawing.Point(154, 40);
 			this.numberInput.Maximum = new decimal(new int[] {
-            50,
-            0,
-            0,
-            0});
+			50,
+			0,
+			0,
+			0});
 			this.numberInput.Minimum = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
+			1,
+			0,
+			0,
+			0});
 			this.numberInput.Name = "numberInput";
 			this.numberInput.Size = new System.Drawing.Size(53, 20);
 			this.numberInput.TabIndex = 3;
 			this.numberInput.Value = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
+			1,
+			0,
+			0,
+			0});
 			// 
 			// processList
 			// 
@@ -150,11 +151,11 @@
 			this.processList.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
 			this.processList.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
 			this.processList.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.Checkbox,
-            this.Number,
-            this.Active,
-            this.Multibox,
-            this.PID});
+			this.Checkbox,
+			this.Number,
+			this.Active,
+			this.Multibox,
+			this.PID});
 			dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
 			dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Window;
 			dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -225,12 +226,12 @@
 			this.autoFarmerType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.autoFarmerType.FormattingEnabled = true;
 			this.autoFarmerType.Items.AddRange(new object[] {
-            "None",
-            "PortalRows",
-            "Magplant",
-            "PlaceTake",
-            "Plant",
-            "Drop"});
+			"None",
+			"PortalRows",
+			"Magplant",
+			"PlaceTake",
+			"Plant",
+			"Drop"});
 			this.autoFarmerType.Location = new System.Drawing.Point(15, 100);
 			this.autoFarmerType.Name = "autoFarmerType";
 			this.autoFarmerType.Size = new System.Drawing.Size(134, 21);
@@ -261,8 +262,8 @@
 			this.multiboxToggle.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.multiboxToggle.FormattingEnabled = true;
 			this.multiboxToggle.Items.AddRange(new object[] {
-            "Enabled",
-            "Disabled"});
+			"Enabled",
+			"Disabled"});
 			this.multiboxToggle.Location = new System.Drawing.Point(15, 140);
 			this.multiboxToggle.Name = "multiboxToggle";
 			this.multiboxToggle.Size = new System.Drawing.Size(134, 21);
@@ -288,11 +289,21 @@
 			this.toggleMultibox.UseVisualStyleBackColor = true;
 			this.toggleMultibox.Click += new System.EventHandler(this.ToggleMultiboxes);
 			// 
+			// button1
+			// 
+			this.button1.Location = new System.Drawing.Point(206, 66);
+			this.button1.Name = "button1";
+			this.button1.Size = new System.Drawing.Size(279, 11);
+			this.button1.TabIndex = 12;
+			this.button1.UseVisualStyleBackColor = true;
+			this.button1.Click += new System.EventHandler(this.button1_Click);
+			// 
 			// Autofarmer
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(497, 246);
+			this.Controls.Add(this.button1);
 			this.Controls.Add(this.toggleMultibox);
 			this.Controls.Add(this.multiboxOK);
 			this.Controls.Add(this.multiboxToggle);
@@ -342,6 +353,7 @@
 		private System.Windows.Forms.DataGridViewTextBoxColumn Multibox;
 		private System.Windows.Forms.DataGridViewTextBoxColumn PID;
 		private System.Windows.Forms.Button toggleMultibox;
+		private System.Windows.Forms.Button button1;
 	}
 }
 
