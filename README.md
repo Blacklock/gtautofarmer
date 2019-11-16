@@ -1,6 +1,6 @@
 # GTAutofarmer
 
-A multi-account autofarmer bot for Growtopia. This project has been abandoned as of now.
+A multi-account autofarmer bot for Growtopia. This project has been abandoned as of now. The multiboxing branch was a complete disaster when I last touched it, and there were some issues with autofarming as well.
 
 ## How to use
 
