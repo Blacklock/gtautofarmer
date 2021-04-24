@@ -1,13 +1,13 @@
 # GTAutofarmer
 
-A multi-account autofarmer bot for Growtopia. This project has been abandoned as of now. The multiboxing branch was a complete disaster when I last touched it, and there were some issues with autofarming as well.
+**This project is unfinished & has been abandoned.** GTAutoformer allows you to open multiple instances of the game at the same time. The multiboxing branch was a complete disaster the last time I touched it, and there were some issues with the multimag autofarming mode as well. Feel free to use this code for whatever you're doing or check out the repos of people who have kept working on the code (none appear to be open-source so I'd be slightly cautious though).
 
 ## How to use
 
-GTAutofarmer only works on Windows.
-GTAutofarmer can open multiple instances of Growtopia at the same time and farm with them.
-You can download a .exe file and launch it to start using it right away, or compile it from source.
-GTAutoFarmer uses `kernel32.dll` and `ntdll.dll`.
+1. GTAutofarmer only works on Windows.
+2. GTAutofarmer can open multiple instances of Growtopia at the same time and farm with them.
+3. You must compile the code from source (Visual Studio).
+4. GTAutoFarmer uses `kernel32.dll` and `ntdll.dll`.
 
 ## Common problems
 
